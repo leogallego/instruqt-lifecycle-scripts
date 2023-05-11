@@ -106,37 +106,37 @@
     tags:
       - job_template         
 
-- name: Create a Workflow Template
-  awx.awx.workflow_job_template:
-    name: deploy-workflow
-    description: Run 3 job templates
-    organization: Default
-    inventory: lab-inventory
-    workflow_nodes:
-      - identifier: node101
-        unified_job_template:
-          organization:
-            name: Default
-          name: "Install Apache"
-          type: job_template
-        credentials: []
-        related:
-          success_nodes:
-            - identifier: node201
-          failure_nodes: []
-          always_nodes: []
+  - name: Create a Workflow Template
+    awx.awx.workflow_job_template:
+      name: deploy-workflow
+      description: Run 3 job templates
+      organization: Default
+      inventory: lab-inventory
+      workflow_nodes:
+        - identifier: node101
+          unified_job_template:
+            organization:
+              name: Default
+            name: "Install Apache"
+            type: job_template
           credentials: []
-      - identifier: node201
-        unified_job_template:
-          organization:
-            name: Default
-          name: "Extended services"
-          type: job_template
-        credentials: []
-        related:
-          success_nodes: []
-          failure_nodes: []
-          always_nodes: []
+          related:
+            success_nodes:
+              - identifier: node201
+            failure_nodes: []
+            always_nodes: []
+            credentials: []
+        - identifier: node201
+          unified_job_template:
+            organization:
+              name: Default
+            name: "Extended services"
+            type: job_template
           credentials: []
+          related:
+            success_nodes: []
+            failure_nodes: []
+            always_nodes: []
+            credentials: []
 
 
