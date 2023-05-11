@@ -14,12 +14,21 @@
 #    controller_pass: ansible123!
 
   tasks:
+    - name: Add EE to the controller instance
+      awx.awx.execution_environment:
+        name: "servicenow-ee"
+        image: quay.io/acme_corp/servicenow-ee:latest
+      tags:
+        - setup-ee
+        - setup-controller-101
+
     - name: Create an inventory in automation controller
       awx.awx.inventory:
         name: lab-inventory
         organization: Default
       tags:
-        - inventory
+        - setup-inventory
+        - solve-inventory 
 
     - name: Add host1 and host2 to lab-inventory
       awx.awx.host:
@@ -33,16 +42,13 @@
         - setup-inventory
         - solve-inventory
 
-    
-
     - name: Create web group and add hosts 
       awx.awx.group:
         name: web
         inventory: lab-inventory
-        hosts: "{{ item }}"
-      loop:
-        - host1
-        - host2    
+        hosts: 
+          - host1
+          - host2    
       tags:
         - setup-inventory
         - solve-inventory
@@ -174,3 +180,22 @@
 
   #### CHECK MODE? 
 
+    - name: Create an inventory in automation controller
+      awx.awx.inventory:
+        name: lab-inventory
+        organization: Default
+      check_mode: true
+      tags:
+        - check-inventory
+
+    - name: Add host1 and host2 to lab-inventory
+      awx.awx.host:
+        name: "{{ item }}"
+        inventory: lab-inventory
+        state: present
+      loop:
+        - host1
+        - host2
+      check_mode: true
+      tags:
+        - check-inventory
