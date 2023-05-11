@@ -1,5 +1,5 @@
 ---
-- name: Configure automation controller
+- name: Instruqt getting started with controller 
   hosts: localhost
   become: false
   gather_facts: false
