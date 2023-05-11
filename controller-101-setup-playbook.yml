@@ -20,6 +20,7 @@
       tags:
         - setup-ee
         - setup-controller-101
+        - setup-env
 
     - name: Create an inventory in automation controller
       awx.awx.inventory:
@@ -29,14 +30,14 @@
         - setup-inventory
         - solve-inventory 
 
-    - name: Add host1 and host2 to lab-inventory
+    - name: Add node1 and node2 to lab-inventory
       awx.awx.host:
         name: "{{ item }}"
         inventory: lab-inventory
         state: present
       loop:
-        - host1
-        - host2
+        - node1
+        - node2
       tags:
         - setup-inventory
         - solve-inventory
@@ -46,10 +47,11 @@
         name: web
         inventory: lab-inventory
         hosts:
-          - host1
-          - host2    
+          - node1
+          - node2    
       tags:
         - setup-inventory
+        - setup-inventory-group
         - solve-inventory
 
     - name: Create machine Credentials for the lab
@@ -177,9 +179,9 @@
         - solve-workflow
 
 
-  #### CHECK MODE? 
+  #### CHECK MODE
 
-    - name: Create an inventory in automation controller
+    - name: Create an inventory in automation controller - check
       awx.awx.inventory:
         name: lab-inventory
         organization: Default
@@ -187,14 +189,27 @@
       tags:
         - check-inventory
 
-    - name: Add host1 and host2 to lab-inventory
+    - name: Add node1 and node2 to lab-inventory
       awx.awx.host:
         name: "{{ item }}"
         inventory: lab-inventory
         state: present
       loop:
-        - host1
-        - host2
+        - node1
+        - node2
       check_mode: true
       tags:
-        - check-inventory
+        - check-hosts
+        - check-inv-hosts
+
+    - name: Create web group and add hosts 
+      awx.awx.group:
+        name: web
+        inventory: lab-inventory
+        hosts:
+          - node1
+          - node2   
+      check_mode: true
+      tags:
+        - check-group 
+        - check-inv-group
