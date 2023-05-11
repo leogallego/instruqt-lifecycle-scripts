@@ -134,8 +134,7 @@
           type: job_template
         credentials: []
         related:
-          success_nodes:
-            - identifier: node301
+          success_nodes: []
           failure_nodes: []
           always_nodes: []
           credentials: []
