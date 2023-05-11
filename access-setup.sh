@@ -1,0 +1,4 @@
+export CONTROLLER_HOST=localhost
+export CONTROLLER_USERNAME=admin
+export CONTROLLER_PASSWORD='ansible123!'
+export CONTROLLER_VERIFY_SSL=false

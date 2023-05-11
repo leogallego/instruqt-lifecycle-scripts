@@ -1,0 +1,143 @@
+---
+- name: Configure automation controller
+  hosts: localhost
+  become: false
+  gather_facts: false
+#  collections:
+#    - awx.awx 
+#  vars:
+#    controller_host: localhost
+#    controller_user: admin
+#    controller_pass: ansible123!
+
+  tasks:
+  - name: Create an inventory in automation controller 
+    awx.awx.inventory:
+      name: lab-inventory
+      organization: Default
+  - name: Add host1 and host2 to lab-inventory
+    awx.awx.host:
+      name: "{{ item }}"
+      inventory: lab-inventory
+      state: present
+    loop:
+      - host1
+      - host2
+    tags:
+      - inventory
+  
+  - name: Create machine Credentials for the lab
+    awx.awx.credential:
+      name: lab-credentials
+      credential_type: Machine
+      organization: Default
+#      inputs:
+#        username: ansible 
+#        ssh_key_data: "{{ lookup('file', '~/.ssh/id_rsa_lab_controller' ) }}"
+    tags:
+      - credentials
+
+
+  - name: Create your first Project from git
+    awx.awx.project:
+      name: "Apache playbooks"
+      organization: Default
+      state: present
+      scm_type: git
+      scm_url: https://github.com/leogallego/instruqt-wyfp.git
+    tags:
+      - project
+
+## TODO: verify projects synced before template
+
+  - name: Create a Job Template
+    awx.awx.job_template:
+      name: "Install Apache"
+      organization: Default
+      state: present
+      inventory: lab-inventory
+      become_enabled: True
+      playbook: apache.yml
+      project: Apache playbooks 
+      credential: lab-credentials 
+    tags:
+      - job_template 
+
+  - name: Create an additional Project from git
+    awx.awx.project:
+      name: "Additional playbooks"
+      organization: Default
+      state: present
+      scm_type: git
+      scm_url: https://github.com/leogallego/instruqt-wyfp-additional.git
+    tags:
+      - project
+
+## TODO: verify projects synced before template
+#  - name: Launch  project sync 
+#    project_update:
+#      project: "Additional playbooks"
+#      wait: true
+#
+
+  - name: Create a motd Job Template
+    awx.awx.job_template:
+      name: "Set motd"
+      organization: Default
+      state: present
+      inventory: lab-inventory
+      become_enabled: True
+      playbook: motd_facts.yml
+      project: "Additional playbooks" 
+      credential: lab-credentials 
+    tags:
+      - job_template 
+
+  - name: Create extended services Job Template
+    awx.awx.job_template:
+      name: "Extended services"
+      organization: Default
+      state: present
+      inventory: lab-inventory
+      become_enabled: True
+      playbook: extended_services.yml
+      project: "Additional playbooks" 
+      credential: lab-credentials 
+    tags:
+      - job_template         
+
+- name: Create a Workflow Template
+  awx.awx.workflow_job_template:
+    name: deploy-workflow
+    description: Run 3 job templates
+    organization: Default
+    inventory: lab-inventory
+    workflow_nodes:
+      - identifier: node101
+        unified_job_template:
+          organization:
+            name: Default
+          name: "Install Apache"
+          type: job_template
+        credentials: []
+        related:
+          success_nodes:
+            - identifier: node201
+          failure_nodes: []
+          always_nodes: []
+          credentials: []
+      - identifier: node201
+        unified_job_template:
+          organization:
+            name: Default
+          name: "Extended services"
+          type: job_template
+        credentials: []
+        related:
+          success_nodes:
+            - identifier: node301
+          failure_nodes: []
+          always_nodes: []
+          credentials: []
+
+
