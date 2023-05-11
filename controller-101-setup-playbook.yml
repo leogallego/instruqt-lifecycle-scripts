@@ -181,7 +181,7 @@
 
   #### CHECK MODE
 
-    - name: Create an inventory in automation controller - check
+    - name: Check inventory 
       awx.awx.inventory:
         name: lab-inventory
         organization: Default
@@ -189,7 +189,7 @@
       tags:
         - check-inventory
 
-    - name: Add node1 and node2 to lab-inventory
+    - name: Check node1 and node2 in lab-inventory
       awx.awx.host:
         name: "{{ item }}"
         inventory: lab-inventory
@@ -202,7 +202,7 @@
         - check-hosts
         - check-inv-hosts
 
-    - name: Create web group and add hosts 
+    - name: Check web group and add hosts 
       awx.awx.group:
         name: web
         inventory: lab-inventory
