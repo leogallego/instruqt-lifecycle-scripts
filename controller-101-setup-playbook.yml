@@ -4,9 +4,8 @@
   become: false
   gather_facts: false
 
-#  collections:
-#    - awx.awx 
-
+  collections:
+    - awx.awx 
 #  vars:
 #    inventory_name: lab-inventory
 #    controller_host: localhost
@@ -46,7 +45,7 @@
       awx.awx.group:
         name: web
         inventory: lab-inventory
-        hosts: 
+        hosts:
           - host1
           - host2    
       tags:
@@ -58,9 +57,9 @@
         name: lab-credentials
         credential_type: Machine
         organization: Default
-  #      inputs:
-  #        username: ansible 
-  #        ssh_key_data: "{{ lookup('file', '~/.ssh/id_rsa_lab_controller' ) }}"
+#      inputs:
+#        username: ansible 
+#        ssh_key_data: "{{ lookup('file', '~/.ssh/id_rsa_lab_controller' ) }}"
       tags:
         - setup-credentials
         - solve-credentials
