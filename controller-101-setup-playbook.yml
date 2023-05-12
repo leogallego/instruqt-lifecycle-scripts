@@ -6,6 +6,7 @@
 
   collections:
     - awx.awx 
+
 #  vars:
 #    inventory_name: lab-inventory
 #    controller_host: localhost
@@ -13,7 +14,8 @@
 #    controller_pass: ansible123!
 
   tasks:
-    - name: Add ee to controller
+
+    - name: Add EE to Controller
       awx.awx.execution_environment:
         name: "servicenow-ee"
         image: quay.io/acme_corp/servicenow-ee:latest
@@ -183,6 +185,31 @@
         - setup-workflow
         - solve-workflow
 
+## Workflow fails because we are missing some things.
+## Our last job template tries to deploy postgresql into node 3
+## But we have no [database] group or node3 in our lab-inventory.
+## Create the group and add node3 to it. 
+## This is a challenge, no instructions!
+
+    - name: Add node3 to lab-inventory
+      awx.awx.host:
+        name: node3
+        inventory: lab-inventory
+        state: present
+      tags:
+        - solve-pre-workflow
+        - solve-node3
+
+    - name: Create web group and add hosts 
+      awx.awx.group:
+        name: database
+        inventory: lab-inventory
+        hosts:
+          - node3    
+      tags:
+        - solve-pre-workflow
+        - solve-database
+
 #########################################
 ####        CHECK MODE
 #########################################
@@ -334,3 +361,25 @@
       check_mode: true
       tags:
         - check-workflow
+
+
+    - name: Check node3 to lab-inventory
+      awx.awx.host:
+        name: node3
+        inventory: lab-inventory
+        state: present
+      check_mode: true
+      tags:
+        - check-pre-workflow
+        - check-node3
+
+    - name: Check database group and add host
+      awx.awx.group:
+        name: database
+        inventory: lab-inventory
+        hosts:
+          - node3    
+      check_mode: true
+      tags:
+        - check-pre-workflow
+        - check-database
