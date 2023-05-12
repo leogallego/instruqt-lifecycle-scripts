@@ -236,6 +236,7 @@
       check_mode: true
       tags:
         - check-inventory
+        - check-all
 
     - name: Check node1 and node2 in lab-inventory
       awx.awx.host:
@@ -249,6 +250,7 @@
       tags:
         - check-hosts
         - check-inv-hosts
+        - check-all
 
     - name: Check web group and add hosts 
       awx.awx.group:
@@ -261,6 +263,7 @@
       tags:
         - check-group 
         - check-inv-group
+        - check-all
 
 
     - name: Create your first Project from git
@@ -273,6 +276,7 @@
       check_mode: true
       tags:
         - check-project
+        - check-all
       
 
   ## TODO: verify projects synced before template
@@ -290,6 +294,7 @@
       check_mode: true
       tags:
         - check-job_template 
+        - check-all
         
 
   ## TODO: review job_launch?
@@ -304,6 +309,7 @@
       check_mode: true
       tags:
         - check-project2
+        - check-all
 
   ## TODO: verify projects synced before template
   #  - name: Launch  project sync 
@@ -325,6 +331,7 @@
       check_mode: true
       tags:
         - check-job_template2 
+        - check-all
 
     - name: Create extended services Job Template
       awx.awx.job_template:
@@ -339,6 +346,32 @@
       check_mode: true
       tags:
         - check-job_template3        
+        - check-all
+
+
+    - name: Check node3 to lab-inventory
+      awx.awx.host:
+        name: node3
+        inventory: lab-inventory
+        state: present
+      check_mode: true
+      tags:
+        - check-pre-workflow
+        - check-node3
+        - check-all
+
+    - name: Check database group and add host
+      awx.awx.group:
+        name: database
+        inventory: lab-inventory
+        hosts:
+          - node3    
+      check_mode: true
+      tags:
+        - check-pre-workflow
+        - check-database
+        - check-all
+
 
     - name: Create a Workflow Template
       awx.awx.workflow_job_template:
@@ -375,25 +408,5 @@
       check_mode: true
       tags:
         - check-workflow
+        - check-all
 
-
-    - name: Check node3 to lab-inventory
-      awx.awx.host:
-        name: node3
-        inventory: lab-inventory
-        state: present
-      check_mode: true
-      tags:
-        - check-pre-workflow
-        - check-node3
-
-    - name: Check database group and add host
-      awx.awx.group:
-        name: database
-        inventory: lab-inventory
-        hosts:
-          - node3    
-      check_mode: true
-      tags:
-        - check-pre-workflow
-        - check-database
