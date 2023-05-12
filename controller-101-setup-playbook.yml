@@ -104,8 +104,8 @@
         scm_type: git
         scm_url: https://github.com/leogallego/instruqt-wyfp-additional.git
       tags:
-        - setup-project
-        - solve-project
+        - setup-project2
+        - solve-project2
 
   ## TODO: verify projects synced before template
   #  - name: Launch  project sync 
@@ -125,8 +125,8 @@
         project: "Additional playbooks" 
         credential: lab-credentials 
       tags:
-        - setup-job_template 
-        - solve-job_template 
+        - setup-job_template2 
+        - solve-job_template2
 
     - name: Create extended services Job Template
       awx.awx.job_template:
@@ -139,8 +139,8 @@
         project: "Additional playbooks" 
         credential: lab-credentials 
       tags:
-        - setup-job_template         
-        - solve-job_template         
+        - setup-job_template3         
+        - solve-job_template3        
 
     - name: Create a Workflow Template
       awx.awx.workflow_job_template:
@@ -178,8 +178,10 @@
         - setup-workflow
         - solve-workflow
 
+#########################################
+####        CHECK MODE
+#########################################
 
-  #### CHECK MODE
 
     - name: Check inventory 
       awx.awx.inventory:
@@ -213,3 +215,117 @@
       tags:
         - check-group 
         - check-inv-group
+
+
+    - name: Create your first Project from git
+      awx.awx.project:
+        name: "Apache playbooks"
+        organization: Default
+        state: present
+        scm_type: git
+        scm_url: https://github.com/leogallego/instruqt-wyfp.git
+      check_mode: true
+      tags:
+        - check-project
+      
+
+  ## TODO: verify projects synced before template
+
+    - name: Create a Job Template
+      awx.awx.job_template:
+        name: "Install Apache"
+        organization: Default
+        state: present
+        inventory: lab-inventory
+        become_enabled: True
+        playbook: apache.yml
+        project: Apache playbooks 
+        credential: lab-credentials 
+      check_mode: true
+      tags:
+        - check-job_template 
+        
+
+  ## TODO: review job_launch?
+
+    - name: Create an additional Project from git
+      awx.awx.project:
+        name: "Additional playbooks"
+        organization: Default
+        state: present
+        scm_type: git
+        scm_url: https://github.com/leogallego/instruqt-wyfp-additional.git
+      check_mode: true
+      tags:
+        - check-project2
+
+  ## TODO: verify projects synced before template
+  #  - name: Launch  project sync 
+  #    project_update:
+  #      project: "Additional playbooks"
+  #      wait: true
+  #
+
+    - name: Create a motd Job Template
+      awx.awx.job_template:
+        name: "Set motd"
+        organization: Default
+        state: present
+        inventory: lab-inventory
+        become_enabled: True
+        playbook: motd_facts.yml
+        project: "Additional playbooks" 
+        credential: lab-credentials 
+      check_mode: true
+      tags:
+        - check-job_template2 
+
+    - name: Create extended services Job Template
+      awx.awx.job_template:
+        name: "Extended services"
+        organization: Default
+        state: present
+        inventory: lab-inventory
+        become_enabled: True
+        playbook: extended_services.yml
+        project: "Additional playbooks" 
+        credential: lab-credentials 
+      check_mode: true
+      tags:
+        - check-job_template3        
+
+    - name: Create a Workflow Template
+      awx.awx.workflow_job_template:
+        name: Your first workflow
+        description: Create a Workflow from previous Job Templates
+        organization: Default
+        inventory: lab-inventory
+        workflow_nodes:
+          - identifier: apache101
+            unified_job_template:
+              organization:
+                name: Default
+              name: "Install Apache"
+              type: job_template
+            credentials: []
+            related:
+              success_nodes:
+                - identifier: extended201
+              failure_nodes: []
+              always_nodes: []
+              credentials: []
+          - identifier: extended201
+            unified_job_template:
+              organization:
+                name: Default
+              name: "Extended services"
+              type: job_template
+            credentials: []
+            related:
+              success_nodes: []
+              failure_nodes: []
+              always_nodes: []
+              credentials: []
+      check_mode: true
+      tags:
+        - check-workflow
