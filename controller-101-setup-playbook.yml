@@ -31,6 +31,7 @@
       tags:
         - setup-inventory
         - solve-inventory 
+        - solve-workflow
 
     - name: Add node1 and node2 to lab-inventory
       awx.awx.host:
@@ -43,6 +44,7 @@
       tags:
         - setup-inventory
         - solve-inventory
+        - solve-workflow
 
     - name: Create web group and add hosts 
       awx.awx.group:
@@ -55,6 +57,7 @@
         - setup-inventory
         - setup-inventory-group
         - solve-inventory
+        - solve-workflow
 
     - name: Create machine Credentials for the lab
       awx.awx.credential:
@@ -67,6 +70,7 @@
       tags:
         - setup-credentials
         - solve-credentials
+        - solve-workflow
 
 
     - name: Create your first Project from git
@@ -80,6 +84,7 @@
         - setup-project
         - setup-projects
         - solve-project
+        - solve-workflow
 
   ## TODO: verify projects synced before template
 
@@ -97,6 +102,7 @@
         - setup-job_template 
         - setup-job_templates
         - solve-job_template 
+        - solve-workflow
 
   ## TODO: review job_launch?
 
@@ -111,6 +117,7 @@
         - setup-project2
         - setup-projects
         - solve-project2
+        - solve-workflow
 
   ## TODO: verify projects synced before template
   #  - name: Launch  project sync 
@@ -133,6 +140,7 @@
         - setup-job_template2 
         - setup-job_templates
         - solve-job_template2
+        - solve-workflow
 
     - name: Create extended services Job Template
       awx.awx.job_template:
@@ -147,7 +155,37 @@
       tags:
         - setup-job_template3
         - setup_job_templates         
-        - solve-job_template3        
+        - solve-job_template3     
+        - solve-workflow   
+
+## Workflow fails because we are missing some things.
+## Our last job template tries to deploy postgresql into node 3
+## But we have no [database] group or node3 in our lab-inventory.
+## Create the group and add node3 to it. 
+## This is a challenge, no instructions!
+
+    - name: Add node3 to lab-inventory
+      awx.awx.host:
+        name: node3
+        inventory: lab-inventory
+        state: present
+      tags:
+        - solve-pre-workflow
+        - solve-node3
+        - solve-workflow
+
+    - name: Create web group and add hosts 
+      awx.awx.group:
+        name: database
+        inventory: lab-inventory
+        hosts:
+          - node3    
+      tags:
+        - solve-pre-workflow
+        - solve-database
+        - solve-workflow
+
+
 
     - name: Create a Workflow Template
       awx.awx.workflow_job_template:
@@ -185,30 +223,6 @@
         - setup-workflow
         - solve-workflow
 
-## Workflow fails because we are missing some things.
-## Our last job template tries to deploy postgresql into node 3
-## But we have no [database] group or node3 in our lab-inventory.
-## Create the group and add node3 to it. 
-## This is a challenge, no instructions!
-
-    - name: Add node3 to lab-inventory
-      awx.awx.host:
-        name: node3
-        inventory: lab-inventory
-        state: present
-      tags:
-        - solve-pre-workflow
-        - solve-node3
-
-    - name: Create web group and add hosts 
-      awx.awx.group:
-        name: database
-        inventory: lab-inventory
-        hosts:
-          - node3    
-      tags:
-        - solve-pre-workflow
-        - solve-database
 
 #########################################
 ####        CHECK MODE
