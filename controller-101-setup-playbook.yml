@@ -13,7 +13,7 @@
 #    controller_pass: ansible123!
 
   tasks:
-    - name: Add EE to the controller instance
+    - name: Add ee to controller
       awx.awx.execution_environment:
         name: "servicenow-ee"
         image: quay.io/acme_corp/servicenow-ee:latest
@@ -59,9 +59,9 @@
         name: lab-credentials
         credential_type: Machine
         organization: Default
-#      inputs:
-#        username: ansible 
-#        ssh_key_data: "{{ lookup('file', '~/.ssh/id_rsa_lab_controller' ) }}"
+      inputs:
+        username: rhel 
+        ssh_key_data: "{{ lookup('file', '~/.ssh/id_rsa' ) }}"
       tags:
         - setup-credentials
         - solve-credentials
@@ -76,6 +76,7 @@
         scm_url: https://github.com/leogallego/instruqt-wyfp.git
       tags:
         - setup-project
+        - setup-projects
         - solve-project
 
   ## TODO: verify projects synced before template
@@ -92,6 +93,7 @@
         credential: lab-credentials 
       tags:
         - setup-job_template 
+        - setup-job_templates
         - solve-job_template 
 
   ## TODO: review job_launch?
@@ -105,6 +107,7 @@
         scm_url: https://github.com/leogallego/instruqt-wyfp-additional.git
       tags:
         - setup-project2
+        - setup-projects
         - solve-project2
 
   ## TODO: verify projects synced before template
@@ -126,6 +129,7 @@
         credential: lab-credentials 
       tags:
         - setup-job_template2 
+        - setup-job_templates
         - solve-job_template2
 
     - name: Create extended services Job Template
@@ -139,7 +143,8 @@
         project: "Additional playbooks" 
         credential: lab-credentials 
       tags:
-        - setup-job_template3         
+        - setup-job_template3
+        - setup_job_templates         
         - solve-job_template3        
 
     - name: Create a Workflow Template
