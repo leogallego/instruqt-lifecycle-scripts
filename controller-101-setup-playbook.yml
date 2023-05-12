@@ -61,9 +61,9 @@
         name: lab-credentials
         credential_type: Machine
         organization: Default
-      inputs:
-        username: rhel 
-        ssh_key_data: "{{ lookup('file', '~/.ssh/id_rsa' ) }}"
+        inputs:
+          username: rhel 
+          ssh_key_data: "{{ lookup('file', '/home/rhel/.ssh/id_rsa' ) }}"
       tags:
         - setup-credentials
         - solve-credentials
