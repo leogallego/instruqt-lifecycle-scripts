@@ -85,14 +85,15 @@
         - solve-project
         - solve-workflow
 
-  ## TODO: verify projects synced before template
-  #  - name: Launch  project sync 
-  #    project_update:
-  #      project: "Additional playbooks"
-  #      wait: true
-  #
-  ## TODO: verify projects synced before template
-
+  ## TODO: verify projects synced before template in case of skip?
+    - name: Launch project sync 
+      awx.awx.project_update:
+        project: "Apache playbooks"
+        wait: true
+      tags:
+        - solve-project
+        - solve-workflow
+  
     - name: Create a Job Template
       awx.awx.job_template:
         name: "Install Apache"
@@ -109,10 +110,18 @@
         - solve-job_template 
         - solve-workflow
 
-
+  ## Verify Job Template is launched on skip
+    - name: Launch the Job Template
+      awx.awx.job_template:
+        job_template: "Install Apache"
+      register: job_apache
+      tags:
+        - solve-job_template
+        - solve-workflow
+  
   ## TODO: review/verify job_launch success ?
 
-    - name: Create an additional Project from git
+    - name: Create a second Project from git
       awx.awx.project:
         name: "Additional playbooks"
         organization: Default
@@ -125,12 +134,15 @@
         - solve-project2
         - solve-workflow
 
-  ## TODO: verify projects synced before template
-  #  - name: Launch  project sync 
-  #    project_update:
-  #      project: "Additional playbooks"
-  #      wait: true
-  #
+  ## TODO: verify projects synced before template in case of skip?
+    - name: Launch project sync 
+      awx.awx.project_update:
+        project: "Additional playbooks"
+        wait: true
+      tags:
+        - solve-project2
+        - solve-workflow
+  
 
     - name: Create a motd Job Template
       awx.awx.job_template:
@@ -148,6 +160,16 @@
         - solve-job_template2
         - solve-workflow
 
+  ## Verify Job Template is launched on skip
+    - name: Launch the Job Template
+      awx.awx.job_template:
+        job_template: "Set motd"
+      register: job_motd
+      tags:
+        - solve-job_template2
+        - solve-workflow
+
+
     - name: Create extended services Job Template
       awx.awx.job_template:
         name: "Extended services"
@@ -163,6 +185,16 @@
         - setup_job_templates         
         - solve-job_template3     
         - solve-workflow   
+
+  ## Verify Job Template is launched on skip
+    - name: Launch the Job Template
+      awx.awx.job_template:
+        job_template: "Extended services"
+      register: job_extended
+      tags:
+        - solve-job_template3
+        - solve-workflow
+
 
 ## Workflow fails because we are missing some things.
 ## Our last job template tries to deploy postgresql into node 3
