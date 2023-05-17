@@ -459,29 +459,51 @@
 
 ## execution checks // apache service, package, html
 
+## check node1 and node2 individually to register html output?
     - name: Check that apache is working in node1
       ansible.builtin.uri:
         url: http://node1
         return_content: true
-      register: this
-      until: _result.status == 200
+      register: apache_node1
+      until: apache_node1.status == 200
       retries: 720 # 720 * 5 seconds = 1hour (60*60/5)
       delay: 5 # Every 5 seconds
-      failed_when: "'webserver' not in this.content"
+      failed_when: "'webserver' not in apache_node1.content"
       tags:
         - check-apache-uri
         - check-apache
 
+    - name: Check that apache is working in node1
+      ansible.builtin.uri:
+        url: http://node2
+        return_content: true
+      register: apache_node2
+      until: apache_node2.status == 200
+      retries: 720 # 720 * 5 seconds = 1hour (60*60/5)
+      delay: 5 # Every 5 seconds
+      failed_when: "'webserver' not in apache_node2.content"
+      tags:
+        - check-apache-uri
+        - check-apache
+
+
+
+## TODO: delegate to workaround host, need to move to another playbook/hosts.
     - name: Check httpd service is started
       ansible.builtin.service:
         name: httpd
         state: started
+        enabled: true
+      delegate_to: "{{ item }}"
+      loop:
+        - node1
+        - node2
       check_mode: true
       tags:
         - check-apache-service
         - check-apache
 
-    - name: Check the Apache Job Template
+    - name: Check the Apache Job Template launches successfully
       awx.awx.job_launch:
         job_template: "Install Apache"
         wait: true
