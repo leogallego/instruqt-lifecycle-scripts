@@ -8,10 +8,12 @@
     - awx.awx 
 
 #  vars:
-#    inventory_name: Lab-Inventory
 #    controller_host: localhost
 #    controller_user: admin
 #    controller_pass: ansible123!
+#    inventory_name: Lab-Inventory
+#    credentials_name: lab-credentials
+#    
 
   tasks:
     - name: Add EE to Controller
@@ -111,13 +113,14 @@
         - solve-workflow
 
   ## Verify Job Template is launched on skip
-    - name: Launch the Job Template
-      awx.awx.job_template:
+    - name: Launch the Apache Job Template
+      awx.awx.job_launch:
         job_template: "Install Apache"
       register: job_apache
       tags:
         - solve-job_template
         - solve-workflow
+        - solve-jt_apache
   
   ## TODO: review/verify job_launch success ?
 
@@ -155,18 +158,45 @@
         project: "Additional playbooks" 
         credential: lab-credentials 
       tags:
-        - setup-job_template2 
+        - setup-job_template3 #2
         - setup-job_templates
-        - solve-job_template2
+        - solve-job_template3 #2
         - solve-workflow
 
   ## Verify Job Template is launched on skip
     - name: Launch the Job Template
-      awx.awx.job_template:
+      awx.awx.job_launch:
         job_template: "Set motd"
       register: job_motd
       tags:
-        - solve-job_template2
+        - solve-job_template3 #2
+        - solve-workflow
+        - solve-jt_motd
+
+## Get inventory ready for postgresql in node 3
+
+    - name: Add node3 to Lab-Inventory
+      awx.awx.host:
+        name: node3
+        inventory: Lab-Inventory
+        state: present
+      tags:
+        - solve-pre-workflow
+        - solve-node3
+        - solve_job_template2 #3
+        - solve-workflow
+        
+
+    - name: Create database group and add node3 
+      awx.awx.group:
+        name: database
+        inventory: Lab-Inventory
+        hosts:
+          - node3    
+      tags:
+        - solve-pre-workflow
+        - solve-database
+        - solve-job_template2 #3
         - solve-workflow
 
 
@@ -181,48 +211,27 @@
         project: "Additional playbooks" 
         credential: lab-credentials 
       tags:
-        - setup-job_template3
+        - setup-job_template2 #3
         - setup_job_templates         
-        - solve-job_template3     
+        - solve-job_template2 #3    
         - solve-workflow   
 
   ## Verify Job Template is launched on skip
     - name: Launch the Job Template
-      awx.awx.job_template:
+      awx.awx.job_launch:
         job_template: "Extended services"
       register: job_extended
       tags:
-        - solve-job_template3
+        - solve-job_template2 #3
         - solve-workflow
+        - solve-jt_extended
 
 
-## Workflow fails because we are missing some things.
-## Our last job template tries to deploy postgresql into node 3
+## Before we create our Workflow, we are missing some requirements.
+## Our third job template tries to deploy postgresql into node 3
 ## But we have no [database] group or node3 in our Lab-Inventory.
 ## Create the group and add node3 to it. 
 ## This is a challenge, no instructions!
-
-    - name: Add node3 to Lab-Inventory
-      awx.awx.host:
-        name: node3
-        inventory: Lab-Inventory
-        state: present
-      tags:
-        - solve-pre-workflow
-        - solve-node3
-        - solve-workflow
-
-    - name: Create web group and add hosts 
-      awx.awx.group:
-        name: database
-        inventory: Lab-Inventory
-        hosts:
-          - node3    
-      tags:
-        - solve-pre-workflow
-        - solve-database
-        - solve-workflow
-
 
 
     - name: Create a Workflow Template
@@ -368,7 +377,7 @@
         credential: lab-credentials 
       check_mode: true
       tags:
-        - check-job_template2 
+        - check-job_template3 #2 
         - check-all
 
     - name: Create extended services Job Template
@@ -383,7 +392,7 @@
         credential: lab-credentials 
       check_mode: true
       tags:
-        - check-job_template3        
+        - check-job_template2 #3        
         - check-all
 
 
@@ -448,7 +457,9 @@
         - check-workflow
         - check-all
 
-    - name: Check that apache is working
+## execution checks // apache service, package, html
+
+    - name: Check that apache is working in node1
       ansible.builtin.uri:
         url: http://node1
         return_content: true
@@ -469,3 +480,22 @@
       tags:
         - check-apache-service
         - check-apache
+
+    - name: Check the Apache Job Template
+      awx.awx.job_launch:
+        job_template: "Install Apache"
+        wait: true
+        timeout: 120
+      #check_mode: true
+      ignore_errors: true
+      register: job_apache
+      tags:
+        - check-jt_apache
+
+    - name: Verify if the apache job was successful
+      ansible.builtin.assert:
+        that: job_apache.status == 'successful'
+        success_msg: "The job was successful."
+        fail_msg: "The job failed."
+      tags:
+        - check-jt_apache
