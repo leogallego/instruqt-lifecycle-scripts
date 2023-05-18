@@ -519,7 +519,8 @@
               credentials: []   
       check_mode: true
       tags:
-        - check-workflow
+        - check-workflow-only
+        - check-workflow  
         - check-all
 
 ### survey
