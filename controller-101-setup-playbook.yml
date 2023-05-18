@@ -7,19 +7,19 @@
   collections:
     - awx.awx 
 
-#  vars:
-#    controller_host: localhost
-#    controller_user: admin
-#    controller_pass: ansible123!
-#    inventory_name: Lab-Inventory
-#    credentials_name: lab-credentials
+  vars:
+    controller_host: localhost
+    controller_user: admin
+    controller_pass: ansible123!
+    inventory_name: Lab-Inventory
+    credentials_name: lab-credentials
 #    
 
   tasks:
     - name: Add EE to Controller
       awx.awx.execution_environment:
         name: "servicenow-ee"
-        image: quay.io/acme_corp/servicenow-ee:latest
+        image: "quay.io/acme_corp/servicenow-ee:latest"
       tags:
         - setup-ee
         - setup-controller-101
@@ -525,7 +525,7 @@
         - check-apache-uri
         - check-apache
 
-    - name: Check that apache is working in node1
+    - name: Check that apache is working in node2
       ansible.builtin.uri:
         url: http://node2
         return_content: true
