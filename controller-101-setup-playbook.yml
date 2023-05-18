@@ -472,7 +472,7 @@
         - check-all
 
 
-    - name: Create a Workflow Template
+    - name: Check a Workflow Template
       awx.awx.workflow_job_template:
         name: Your first workflow
         description: Create a Workflow from previous Job Templates
@@ -489,6 +489,7 @@
             related:
               success_nodes:
                 - identifier: extended201
+                - identifier: motd201
               failure_nodes: []
               always_nodes: []
               credentials: []
@@ -504,6 +505,18 @@
               failure_nodes: []
               always_nodes: []
               credentials: []
+          - identifier: motd201
+            unified_job_template:
+              organization:
+                name: Default
+              name: "Set motd"
+              type: job_template
+            credentials: []
+            related:
+              success_nodes: []
+              failure_nodes: []
+              always_nodes: []
+              credentials: []   
       check_mode: true
       tags:
         - check-workflow
