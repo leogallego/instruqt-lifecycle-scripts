@@ -49,7 +49,7 @@
         - solve-all
        
 
-    - name: Create web group and add hosts 
+    - name: Create web group and add node1 and node2 
       awx.awx.group:
         name: web
         inventory: Lab-Inventory
@@ -75,7 +75,7 @@
         - solve-all
 
 
-    - name: Create your first Project from git
+    - name: Create your first apache playbooks Project from git
       awx.awx.project:
         name: "Apache playbooks"
         organization: Default
@@ -88,7 +88,7 @@
         - solve-all
 
   ## TODO: verify projects synced before template in case of skip?
-    - name: Launch project sync 
+    - name: Launch apache playbooks project sync 
       awx.awx.project_update:
         project: "Apache playbooks"
         wait: true
@@ -97,7 +97,7 @@
         - solve-workflow
         - solve-all
   
-    - name: Create a Job Template
+    - name: Create install apache Job Template
       awx.awx.job_template:
         name: "Install Apache"
         organization: Default
@@ -127,7 +127,7 @@
   
   ## TODO: review/verify job_launch success ?
 
-    - name: Create a second Project from git
+    - name: Create a second Project from git, additional playbooks
       awx.awx.project:
         name: "Additional playbooks"
         organization: Default
@@ -141,7 +141,7 @@
 
       
   ## TODO: verify projects synced before template in case of skip?
-    - name: Launch project sync 
+    - name: Launch additional playbooks project sync 
       awx.awx.project_update:
         project: "Additional playbooks"
         wait: true
@@ -151,7 +151,7 @@
         - solve-all
   
 
-    - name: Create a motd Job Template
+    - name: Create set motd Job Template
       awx.awx.job_template:
         name: "Set motd"
         organization: Default
@@ -167,7 +167,7 @@
         - solve-all
 
   ## Verify Job Template is launched on skip
-    - name: Launch the Job Template
+    - name: Launch the set motd Job Template
       awx.awx.job_launch:
         job_template: "Set motd"
       register: job_motd
@@ -365,7 +365,7 @@
         - check-all
 
 
-    - name: Create your first Project from git
+    - name: Check your first Project from git
       awx.awx.project:
         name: "Apache playbooks"
         organization: Default
@@ -380,7 +380,7 @@
 
   ## TODO: verify projects synced before template
 
-    - name: Create a Job Template
+    - name: Check a Job Template
       awx.awx.job_template:
         name: "Install Apache"
         organization: Default
@@ -398,7 +398,7 @@
 
   ## TODO: review job_launch?
 
-    - name: Create an additional Project from git
+    - name: Check an additional Project from git
       awx.awx.project:
         name: "Additional playbooks"
         organization: Default
@@ -417,7 +417,7 @@
   #      wait: true
   #
 
-    - name: Create a motd Job Template
+    - name: Check a motd Job Template
       awx.awx.job_template:
         name: "Set motd"
         organization: Default
@@ -432,7 +432,7 @@
         - check-job_template3 #2 
         - check-all
 
-    - name: Create extended services Job Template
+    - name: Check extended services Job Template
       awx.awx.job_template:
         name: "Extended services"
         organization: Default
@@ -508,6 +508,25 @@
       tags:
         - check-workflow
         - check-all
+
+### survey
+    - name: Check Apache with Survey
+      awx.awx.job_template: 
+        name: "Install Apache with Survey"
+        organization: "Default"
+        state: "present"
+        inventory: "Lab-Inventory"
+        become_enabled: True
+        playbook: "apache_template.yml"
+        project: "Apache playbooks"
+        credential: lab-credentials
+        survey_enabled: yes
+        survey_spec: "{{ lookup('file', 'files/apache_survey.json') }}"
+      check_mode: true
+      tags:
+          - check-jt_survey
+          - check-all
+
 
 ## execution checks // apache service, package, html
 
