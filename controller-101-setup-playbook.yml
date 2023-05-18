@@ -227,6 +227,35 @@
         - solve-jt_extended
 
 
+### survey
+    - name: Create a Job Template with Survey
+      awx.awx.job_template: 
+        name: "Install Apache with Survey"
+        organization: "Default"
+        state: "present"
+        inventory: "Lab-Inventory"
+        become_enabled: True
+        playbook: "apache_template.yml"
+        project: "Apache playbooks"
+        credential: lab-credentials
+        survey_enabled: yes
+        survey_spec: "{{ lookup('files', 'apache_survey.json') }}"
+      tags:
+          - setup-jt_survey
+          - solve-jt_survey
+
+    ## Verify Job Template is launched on skip
+    - name: Launch the Apache Job Template with Survey
+      awx.awx.job_launch:
+        job_template: "Install Apache with Survey"
+      register: job_apache_survey
+      tags:
+        - solve-jt_survey
+        - solve-workflow
+        
+### end survey
+
+
 ## Before we create our Workflow, we are missing some requirements.
 ## Our third job template tries to deploy postgresql into node 3
 ## But we have no [database] group or node3 in our Lab-Inventory.
@@ -269,6 +298,8 @@
       tags:
         - setup-workflow
         - solve-workflow
+
+
 
 
 #########################################
