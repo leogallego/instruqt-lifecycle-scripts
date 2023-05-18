@@ -30,9 +30,10 @@
         name: Lab-Inventory
         organization: Default
       tags:
-        - setup-inventory
         - solve-inventory 
         - solve-workflow
+        - solve-all
+
 
     - name: Add node1 and node2 to Lab-Inventory
       awx.awx.host:
@@ -43,9 +44,10 @@
         - node1
         - node2
       tags:
-        - setup-inventory
         - solve-inventory
         - solve-workflow
+        - solve-all
+       
 
     - name: Create web group and add hosts 
       awx.awx.group:
@@ -55,10 +57,9 @@
           - node1
           - node2    
       tags:
-        - setup-inventory
-        - setup-inventory-group
         - solve-inventory
         - solve-workflow
+        - solve-all
 
     - name: Create machine Credentials for the lab
       awx.awx.credential:
@@ -69,9 +70,9 @@
           username: rhel 
           ssh_key_data: "{{ lookup('file', '/home/rhel/.ssh/id_rsa' ) }}"
       tags:
-        - setup-credentials
         - solve-credentials
         - solve-workflow
+        - solve-all
 
 
     - name: Create your first Project from git
@@ -82,10 +83,9 @@
         scm_type: git
         scm_url: https://github.com/leogallego/instruqt-wyfp.git
       tags:
-        - setup-project
-        - setup-projects
         - solve-project
         - solve-workflow
+        - solve-all
 
   ## TODO: verify projects synced before template in case of skip?
     - name: Launch project sync 
@@ -95,6 +95,7 @@
       tags:
         - solve-project
         - solve-workflow
+        - solve-all
   
     - name: Create a Job Template
       awx.awx.job_template:
@@ -107,10 +108,9 @@
         project: Apache playbooks 
         credential: lab-credentials 
       tags:
-        - setup-job_template 
-        - setup-job_templates
         - solve-job_template 
         - solve-workflow
+        - solve-all
 
   ## Verify Job Template is launched on skip
     - name: Launch the Apache Job Template
@@ -119,8 +119,11 @@
       register: job_apache
       tags:
         - solve-job_template
-        - solve-workflow
         - solve-jt_apache
+        - solve-workflow
+        - solve-all
+        
+        
   
   ## TODO: review/verify job_launch success ?
 
@@ -132,11 +135,11 @@
         scm_type: git
         scm_url: https://github.com/leogallego/instruqt-wyfp-additional.git
       tags:
-        - setup-project2
-        - setup-projects
         - solve-project2
         - solve-workflow
+        - solve-all
 
+      
   ## TODO: verify projects synced before template in case of skip?
     - name: Launch project sync 
       awx.awx.project_update:
@@ -145,6 +148,7 @@
       tags:
         - solve-project2
         - solve-workflow
+        - solve-all
   
 
     - name: Create a motd Job Template
@@ -158,10 +162,9 @@
         project: "Additional playbooks" 
         credential: lab-credentials 
       tags:
-        - setup-job_template3 #2
-        - setup-job_templates
         - solve-job_template3 #2
         - solve-workflow
+        - solve-all
 
   ## Verify Job Template is launched on skip
     - name: Launch the Job Template
@@ -170,8 +173,10 @@
       register: job_motd
       tags:
         - solve-job_template3 #2
-        - solve-workflow
         - solve-jt_motd
+        - solve-workflow
+        - solve-all
+        
 
 ## Get inventory ready for postgresql in node 3
 
@@ -185,6 +190,7 @@
         - solve-node3
         - solve_job_template2 #3
         - solve-workflow
+        - solve-all
         
 
     - name: Create database group and add node3 
@@ -198,9 +204,10 @@
         - solve-database
         - solve-job_template2 #3
         - solve-workflow
+        - solve-all
 
 
-    - name: Create extended services Job Template
+    - name: Create Extended services Job Template
       awx.awx.job_template:
         name: "Extended services"
         organization: Default
@@ -210,21 +217,22 @@
         playbook: extended_services.yml
         project: "Additional playbooks" 
         credential: lab-credentials 
-      tags:
-        - setup-job_template2 #3
-        - setup_job_templates         
+      tags:     
         - solve-job_template2 #3    
         - solve-workflow   
+        - solve-all
 
   ## Verify Job Template is launched on skip
-    - name: Launch the Job Template
+    - name: Launch the Extended services Job Template
       awx.awx.job_launch:
         job_template: "Extended services"
       register: job_extended
       tags:
         - solve-job_template2 #3
-        - solve-workflow
         - solve-jt_extended
+        - solve-workflow
+        - solve-all
+        
 
 
 ### survey
@@ -241,8 +249,8 @@
         survey_enabled: yes
         survey_spec: "{{ lookup('files', 'apache_survey.json') }}"
       tags:
-          - setup-jt_survey
           - solve-jt_survey
+          - solve-all
 
     ## Verify Job Template is launched on skip
     - name: Launch the Apache Job Template with Survey
@@ -251,7 +259,7 @@
       register: job_apache_survey
       tags:
         - solve-jt_survey
-        - solve-workflow
+        - solve-all
         
 ### end survey
 
@@ -280,6 +288,7 @@
             related:
               success_nodes:
                 - identifier: extended201
+                - identifier: motd201
               failure_nodes: []
               always_nodes: []
               credentials: []
@@ -295,6 +304,18 @@
               failure_nodes: []
               always_nodes: []
               credentials: []
+          - identifier: motd201
+            unified_job_template:
+              organization:
+                name: Default
+              name: "Set motd"
+              type: job_template
+            credentials: []
+            related:
+              success_nodes: []
+              failure_nodes: []
+              always_nodes: []
+              credentials: []              
       tags:
         - setup-workflow
         - solve-workflow
