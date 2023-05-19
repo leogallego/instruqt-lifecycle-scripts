@@ -31,6 +31,7 @@
         organization: Default
       tags:
         - solve-inventory 
+        - solve-inventory-all
         - solve-workflow
         - solve-all
 
@@ -44,7 +45,8 @@
         - node1
         - node2
       tags:
-        - solve-inventory
+        - solve-inventory-hosts
+        - solve-inventory-all
         - solve-workflow
         - solve-all
        
@@ -57,7 +59,8 @@
           - node1
           - node2    
       tags:
-        - solve-inventory
+        - solve-inventory-group
+        - solve-inventory-all
         - solve-workflow
         - solve-all
 
@@ -332,7 +335,10 @@
       awx.awx.inventory:
         name: Lab-Inventory
         organization: Default
+        kind: ""
       check_mode: true
+      register: check_inv
+      failed_when: check_inv.changed
       tags:
         - check-inventory
         - check-all
@@ -346,6 +352,8 @@
         - node1
         - node2
       check_mode: true
+      register: check_inv_hosts
+      failed_when: check_hosts.changed
       tags:
         - check-hosts
         - check-inv-hosts
@@ -359,6 +367,8 @@
           - node1
           - node2   
       check_mode: true
+      register: check_inv_group
+      failed_when: check_inv_group.changed
       tags:
         - check-group 
         - check-inv-group
@@ -373,6 +383,8 @@
         scm_type: git
         scm_url: https://github.com/leogallego/instruqt-wyfp.git
       check_mode: true
+      register: check_proj
+      failed_when: check_proj.changed
       tags:
         - check-project
         - check-all
@@ -380,7 +392,7 @@
 
   ## TODO: verify projects synced before template
 
-    - name: Check a Job Template
+    - name: Check Apache Job Template
       awx.awx.job_template:
         name: "Install Apache"
         organization: Default
@@ -391,6 +403,8 @@
         project: Apache playbooks 
         credential: lab-credentials 
       check_mode: true
+      register: check_jt_apache
+      failed_when: check_jt_apache.changed
       tags:
         - check-job_template 
         - check-all
@@ -406,6 +420,8 @@
         scm_type: git
         scm_url: https://github.com/leogallego/instruqt-wyfp-additional.git
       check_mode: true
+      register: check_proj2
+      failed_when: check_proj2.changed
       tags:
         - check-project2
         - check-all
@@ -428,8 +444,10 @@
         project: "Additional playbooks" 
         credential: lab-credentials 
       check_mode: true
+      register: check_jt_motd
+      failed_when: check_jt_motd.changed
       tags:
-        - check-job_template3 #2 
+        - check-job_template3  
         - check-all
 
     - name: Check extended services Job Template
@@ -443,8 +461,10 @@
         project: "Additional playbooks" 
         credential: lab-credentials 
       check_mode: true
+      register: check_jt_ext
+      failed_when: check_jt_ext.changed
       tags:
-        - check-job_template2 #3        
+        - check-job_template2         
         - check-all
 
 
@@ -454,6 +474,8 @@
         inventory: Lab-Inventory
         state: present
       check_mode: true
+      register: check_inv_host3
+      failed_when: check_inv_host3.changed
       tags:
         - check-pre-workflow
         - check-node3
@@ -466,6 +488,8 @@
         hosts:
           - node3    
       check_mode: true
+      register: check_inv_grp_db
+      failed_when: check_inv_grp_db.changed
       tags:
         - check-pre-workflow
         - check-database
@@ -474,7 +498,7 @@
 
     - name: Check a Workflow Template
       awx.awx.workflow_job_template:
-        name: Your first workflow
+        name: "Your first workflow"
         description: Create a Workflow from previous Job Templates
         organization: Default
         inventory: Lab-Inventory
@@ -518,6 +542,8 @@
               always_nodes: []
               credentials: []   
       check_mode: true
+      register: check_workflow
+      failed_when: check_workflow.changed
       tags:
         - check-workflow-only
         - check-workflow  
@@ -537,12 +563,16 @@
         survey_enabled: yes
         survey_spec: "{{ lookup('file', 'files/apache_survey.json') }}"
       check_mode: true
+      register: check_survey
+      failed_when: check_survey.changed
       tags:
           - check-jt_survey
           - check-all
 
-
+#########################################
 ## execution checks // apache service, package, html
+#########################################
+
 
 ## check node1 and node2 individually to register html output?
     - name: Check that apache is working in node1
