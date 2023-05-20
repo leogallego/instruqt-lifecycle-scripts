@@ -353,7 +353,7 @@
         - node2
       check_mode: true
       register: check_inv_hosts
-      failed_when: check_hosts.changed
+      failed_when: check_inv_hosts.changed
       tags:
         - check-hosts
         - check-inv-hosts
